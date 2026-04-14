@@ -5,6 +5,7 @@
   "type": "module",
   "description": "MCP server for parallel browser automation across multiple providers.",
   "main": "./dist/index.js",
+  "homepage": "https://github.com/ItayRosen/parallel-browser-mcp",
   "bin": {
     "parallel-browser-mcp": "./dist/index.js"
   },
