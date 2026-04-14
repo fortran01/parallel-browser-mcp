@@ -1,0 +1,19 @@
+{
+  "name": "parallel-browser-mcp-anchor-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone Anchor LangChain example for parallel-browser-mcp.",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@langchain/anthropic": "^1.3.26",
+    "@langchain/mcp-adapters": "^1.1.3",
+    "dotenv": "^17.4.2",
+    "langchain": "^1.3.1"
+  }
+}
