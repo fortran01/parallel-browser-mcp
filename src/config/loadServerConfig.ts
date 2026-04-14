@@ -1,0 +1,97 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import {
+  type ResolvedServerConfig,
+  type ServerConfig,
+  serverConfigSchema,
+} from './serverConfig.js';
+
+const parseBoolean = (value: string | undefined): boolean | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === 'true') {
+    return true;
+  }
+
+  if (value === 'false') {
+    return false;
+  }
+
+  return undefined;
+};
+
+const parseJsonConfig = (rawValue: string, source: string): ServerConfig => {
+  try {
+    return serverConfigSchema.parse(JSON.parse(rawValue));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Invalid browser MCP config from ${source}: ${reason}`);
+  }
+};
+
+const loadConfigOverride = (): ServerConfig => {
+  if (process.env.BROWSER_MCP_CONFIG !== undefined) {
+    return parseJsonConfig(process.env.BROWSER_MCP_CONFIG, 'BROWSER_MCP_CONFIG');
+  }
+
+  if (process.env.BROWSER_MCP_CONFIG_PATH !== undefined) {
+    const filePath = resolve(process.cwd(), process.env.BROWSER_MCP_CONFIG_PATH);
+    const rawValue = readFileSync(filePath, 'utf8');
+
+    return parseJsonConfig(rawValue, `BROWSER_MCP_CONFIG_PATH (${filePath})`);
+  }
+
+  return serverConfigSchema.parse({});
+};
+
+export const loadServerConfig = (): ResolvedServerConfig => {
+  const override = loadConfigOverride();
+  const browserbaseConfig = override.providers.browserbase ?? {};
+  const anchorConfig = override.providers.anchor ?? {};
+  const playwrightConfig = override.providers.playwright ?? {};
+
+  return {
+    defaultProvider: override.defaultProvider ?? 'playwright',
+    providers: {
+      browserbase: {
+        apiKey: process.env.BROWSERBASE_API_KEY ?? null,
+        projectId: browserbaseConfig.projectId ?? process.env.BROWSERBASE_PROJECT_ID ?? null,
+        proxy:
+          browserbaseConfig.proxy ??
+          parseBoolean(process.env.BROWSERBASE_PROXY) ??
+          null,
+        keepAlive:
+          browserbaseConfig.keepAlive ??
+          parseBoolean(process.env.BROWSERBASE_KEEP_ALIVE) ??
+          false,
+        contextId: browserbaseConfig.contextId ?? process.env.BROWSERBASE_CONTEXT_ID ?? null,
+        persist:
+          browserbaseConfig.persist ??
+          parseBoolean(process.env.BROWSERBASE_PERSIST) ??
+          true,
+        sessionOptions: browserbaseConfig.sessionOptions ?? {},
+      },
+      anchor: {
+        apiKey: process.env.ANCHOR_API_KEY ?? null,
+        recording:
+          anchorConfig.recording ??
+          parseBoolean(process.env.ANCHOR_RECORDING) ??
+          null,
+        proxy: anchorConfig.proxy ?? null,
+        timeout: anchorConfig.timeout ?? null,
+        sessionOptions: anchorConfig.sessionOptions ?? {},
+      },
+      playwright: {
+        launchOptions: playwrightConfig.launchOptions ?? {},
+        contextOptions: playwrightConfig.contextOptions ?? {},
+        storageStatePath:
+          playwrightConfig.storageStatePath ?? process.env.PLAYWRIGHT_STORAGE_STATE_PATH ?? null,
+        executablePath:
+          playwrightConfig.executablePath ?? process.env.PLAYWRIGHT_EXECUTABLE_PATH ?? null,
+        channel: playwrightConfig.channel ?? process.env.PLAYWRIGHT_CHANNEL ?? null,
+      },
+    },
+  };
+};

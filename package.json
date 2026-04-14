@@ -1,0 +1,44 @@
+{
+  "name": "parallel-browser-mcp",
+  "version": "0.1.4",
+  "private": false,
+  "type": "module",
+  "description": "MCP server for parallel browser automation across multiple providers.",
+  "main": "./dist/index.js",
+  "bin": {
+    "parallel-browser-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    ".env.example"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+    "postbuild": "chmod +x dist/index.js",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "smoke:local": "tsx src/smoke/localSmoke.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@browserbasehq/sdk": "^2.10.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "anchorbrowser": "^0.16.3",
+    "playwright": "^1.59.1",
+    "playwright-core": "^1.59.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@vitest/coverage-v8": "^3.2.4",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
