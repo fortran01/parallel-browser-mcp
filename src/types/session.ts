@@ -5,6 +5,7 @@ import type {
 import type {
   ResolvedAnchorProviderConfig,
   ResolvedBrowserbaseProviderConfig,
+  ResolvedCloudflareProviderConfig,
   ResolvedPlaywrightProviderConfig,
 } from '../config/serverConfig.js';
 
@@ -22,7 +23,8 @@ export interface StartedBrowserSession {
   resolvedProviderConfig:
     | ResolvedBrowserbaseProviderConfig
     | ResolvedAnchorProviderConfig
-    | ResolvedPlaywrightProviderConfig;
+    | ResolvedPlaywrightProviderConfig
+    | ResolvedCloudflareProviderConfig;
 }
 
 export interface SessionRecord extends StartedBrowserSession {
@@ -44,7 +46,8 @@ export interface SessionSummary {
   resolvedProviderConfig:
     | ResolvedBrowserbaseProviderConfig
     | ResolvedAnchorProviderConfig
-    | ResolvedPlaywrightProviderConfig;
+    | ResolvedPlaywrightProviderConfig
+    | ResolvedCloudflareProviderConfig;
 }
 
 export interface SessionToolContext {

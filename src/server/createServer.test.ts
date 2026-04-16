@@ -29,6 +29,11 @@ describe('createServer', () => {
           executablePath: null,
           channel: null,
         },
+        cloudflare: {
+          apiKey: null,
+          accountId: null,
+          keepAlive: null,
+        },
       },
     });
 

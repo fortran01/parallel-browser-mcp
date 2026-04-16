@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const providerNames = ['browserbase', 'anchor', 'playwright'] as const;
+export const providerNames = ['browserbase', 'anchor', 'playwright', 'cloudflare'] as const;
 
 export type ProviderName = (typeof providerNames)[number];
 
@@ -48,5 +48,14 @@ export const playwrightProviderConfigSchema = z
   .strict();
 
 export type PlaywrightProviderConfig = z.infer<typeof playwrightProviderConfigSchema>;
+
+export const cloudflareProviderConfigSchema = z
+  .object({
+    accountId: z.string().min(1).nullable().optional(),
+    keepAlive: z.number().positive().nullable().optional(),
+  })
+  .strict();
+
+export type CloudflareProviderConfig = z.infer<typeof cloudflareProviderConfigSchema>;
 
 export const providerNameSchema = z.enum(providerNames);

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   anchorProviderConfigSchema,
   browserbaseProviderConfigSchema,
+  cloudflareProviderConfigSchema,
   playwrightProviderConfigSchema,
   providerNameSchema,
 } from '../types/providerConfig.js';
@@ -14,6 +15,7 @@ export const serverConfigSchema = z
         browserbase: browserbaseProviderConfigSchema.optional(),
         anchor: anchorProviderConfigSchema.optional(),
         playwright: playwrightProviderConfigSchema.optional(),
+        cloudflare: cloudflareProviderConfigSchema.optional(),
       })
       .default({}),
   })
@@ -50,11 +52,18 @@ export interface ResolvedPlaywrightProviderConfig {
   channel: string | null;
 }
 
+export interface ResolvedCloudflareProviderConfig {
+  apiKey: string | null;
+  accountId: string | null;
+  keepAlive: number | null;
+}
+
 export interface ResolvedServerConfig {
-  defaultProvider: 'browserbase' | 'anchor' | 'playwright';
+  defaultProvider: 'browserbase' | 'anchor' | 'playwright' | 'cloudflare';
   providers: {
     browserbase: ResolvedBrowserbaseProviderConfig;
     anchor: ResolvedAnchorProviderConfig;
     playwright: ResolvedPlaywrightProviderConfig;
+    cloudflare: ResolvedCloudflareProviderConfig;
   };
 }

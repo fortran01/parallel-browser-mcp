@@ -51,6 +51,7 @@ export const loadServerConfig = (): ResolvedServerConfig => {
   const browserbaseConfig = override.providers.browserbase ?? {};
   const anchorConfig = override.providers.anchor ?? {};
   const playwrightConfig = override.providers.playwright ?? {};
+  const cloudflareConfig = override.providers.cloudflare ?? {};
 
   return {
     defaultProvider: override.defaultProvider ?? 'playwright',
@@ -91,6 +92,11 @@ export const loadServerConfig = (): ResolvedServerConfig => {
         executablePath:
           playwrightConfig.executablePath ?? process.env.PLAYWRIGHT_EXECUTABLE_PATH ?? null,
         channel: playwrightConfig.channel ?? process.env.PLAYWRIGHT_CHANNEL ?? null,
+      },
+      cloudflare: {
+        apiKey: process.env.CLOUDFLARE_API_TOKEN ?? null,
+        accountId: cloudflareConfig.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? null,
+        keepAlive: cloudflareConfig.keepAlive ?? null,
       },
     },
   };

@@ -6,13 +6,14 @@ Supported providers:
 - `playwright` for local Chromium
 - `browserbase` via `@browserbasehq/sdk`
 - `anchor` via `anchorbrowser`
+- `cloudflare` via Cloudflare Browser Run
 
 Each browser session gets a numeric ID like `1`, `2`, `3`, and every `browser_*` tool accepts a `sessionId`.
 
 ## Features
 
 - Multiple concurrent browser sessions in memory
-- Provider abstraction shared across Browserbase, Anchor Browser, and local Playwright
+- Provider abstraction shared across Browserbase, Anchor Browser, Cloudflare Browser Run, and local Playwright
 - MCP session tools:
   - `start_session`
   - `close_session`
@@ -96,6 +97,7 @@ Required credentials by provider:
 - `playwright`: none
 - `browserbase`: `BROWSERBASE_API_KEY`, plus a `projectId` in config or `BROWSERBASE_PROJECT_ID`
 - `anchor`: `ANCHOR_API_KEY`
+- `cloudflare`: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
 
 Optional env defaults:
 - `BROWSERBASE_PROJECT_ID`
@@ -281,6 +283,7 @@ GitHub Actions publishing:
 - `examples/local` contains a standalone npm package that connects to `parallel-browser-mcp` with `@langchain/mcp-adapters` and runs a LangChain agent against the local Playwright provider.
 - `examples/browserbase` contains a standalone npm package that connects LangChain to the published MCP server with Browserbase config and prompts the agent to use `browser_screenshot`.
 - `examples/anchor` contains a standalone npm package that connects LangChain to the published MCP server with Anchor config and prompts the agent to use `browser_snapshot`.
+- `examples/cloudflare` contains a standalone npm package that connects LangChain to the published MCP server with Cloudflare Browser Run config and prompts the agent to use `browser_snapshot`.
 - The root `.npmignore` excludes the full `examples` directory from npm publishing.
 
 ## Testing
