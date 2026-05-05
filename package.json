@@ -1,11 +1,16 @@
 {
   "name": "parallel-browser-mcp",
-  "version": "0.1.6",
+  "version": "0.1.7",
+  "mcpName": "io.github.etairl/parallel-browser-mcp",
   "private": false,
   "type": "module",
   "description": "MCP server for parallel browser automation across multiple providers.",
   "main": "./dist/index.js",
-  "homepage": "https://github.com/ItayRosen/parallel-browser-mcp",
+  "homepage": "https://github.com/etairl/parallel-browser-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/etairl/parallel-browser-mcp.git"
+  },
   "bin": {
     "parallel-browser-mcp": "./dist/index.js"
   },
@@ -30,7 +35,9 @@
   "dependencies": {
     "@browserbasehq/sdk": "^2.10.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "@opencode-ai/sdk": "^1.14.21",
     "anchorbrowser": "^0.16.3",
+    "opencode-ai": "^1.14.21",
     "playwright": "^1.59.1",
     "playwright-core": "^1.59.1",
     "zod": "^3.25.76"
