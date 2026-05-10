@@ -1,5 +1,8 @@
 # parallel-browser-mcp
 
+[![npm version](https://img.shields.io/npm/v/parallel-browser-mcp.svg)](https://www.npmjs.com/package/parallel-browser-mcp)
+[![npm downloads](https://img.shields.io/npm/dt/parallel-browser-mcp.svg)](https://www.npmjs.com/package/parallel-browser-mcp)
+
 `parallel-browser-mcp` is an MCP server for parallel browser automation. It exposes a numeric session model over MCP so one client can create and control multiple browser sessions at the same time across multiple browser providers.
 
 Supported providers:
