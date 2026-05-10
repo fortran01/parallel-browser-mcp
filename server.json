@@ -1,19 +1,19 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.etairl/parallel-browser-mcp",
-  "description": "MCP server for parallel browser automation across multiple providers (Playwright, Browserbase, Anchor, Cloudflare Browser Run).",
+  "description": "MCP server for parallel browser automation across multiple providers.",
   "title": "Parallel Browser MCP",
   "repository": {
     "url": "https://github.com/etairl/parallel-browser-mcp",
     "source": "github"
   },
-  "version": "0.1.7",
+  "version": "0.1.8",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "parallel-browser-mcp",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
