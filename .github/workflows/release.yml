@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      publish_mcp_registry:
+        description: 'Also publish to the MCP registry'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  # Required for OIDC: npm provenance + mcp-publisher login.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - run: npm run build
+
+      - name: Verify package.json and server.json versions agree
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          SRV=$(node -p "require('./server.json').version")
+          SRV_PKG=$(node -p "require('./server.json').packages[0].version")
+          echo "package.json:            $PKG"
+          echo "server.json:             $SRV"
+          echo "server.json.packages[0]: $SRV_PKG"
+          if [ "$PKG" != "$SRV" ] || [ "$PKG" != "$SRV_PKG" ]; then
+            echo "::error::Version mismatch — package.json and server.json must match"
+            exit 1
+          fi
+          # If triggered by a v* tag, make sure it matches package.json too.
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+            if [ "$PKG" != "$TAG_VERSION" ]; then
+              echo "::error::Tag $TAG_VERSION does not match package.json version $PKG"
+              exit 1
+            fi
+          fi
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install mcp-publisher
+        if: ${{ github.event_name == 'push' || inputs.publish_mcp_registry }}
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" \
+            | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry (GitHub OIDC)
+        if: ${{ github.event_name == 'push' || inputs.publish_mcp_registry }}
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to MCP Registry
+        if: ${{ github.event_name == 'push' || inputs.publish_mcp_registry }}
+        run: ./mcp-publisher publish
