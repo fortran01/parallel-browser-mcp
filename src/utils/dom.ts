@@ -46,11 +46,15 @@ export const extractPageSnapshot = async (page: Page): Promise<PageSnapshotResul
       return Array.from(element.children)
         .slice(0, 8)
         .map((child) => {
-          const htmlElement = child as HTMLElement;
+          // `innerText` is only defined on HTMLElement — SVG/MathML elements
+          // and some custom elements return undefined here, so fall back to
+          // `textContent` (available on every Node) before failing to '' .
+          const rawText =
+            (child as HTMLElement).innerText ?? child.textContent ?? '';
 
           return {
             tag: child.tagName.toLowerCase(),
-            text: htmlElement.innerText.trim().replace(/\s+/g, ' ').slice(0, 120),
+            text: rawText.trim().replace(/\s+/g, ' ').slice(0, 120),
             role: child.getAttribute('role'),
             name:
               child.getAttribute('aria-label') ??
@@ -81,12 +85,13 @@ export const generateLocatorCandidates = async (
   selector: string,
 ): Promise<string[]> =>
   page.locator(selector).first().evaluate((element) => {
-    const htmlElement = element as HTMLElement;
     const candidates = new Set<string>();
     const id = element.getAttribute('id');
     const name = element.getAttribute('name');
     const ariaLabel = element.getAttribute('aria-label');
-    const text = htmlElement.innerText.trim().replace(/\s+/g, ' ');
+    // See note in extractPageSnapshot: innerText is HTMLElement-only.
+    const rawText = (element as HTMLElement).innerText ?? element.textContent ?? '';
+    const text = rawText.trim().replace(/\s+/g, ' ');
 
     if (id !== null && id.length > 0) {
       candidates.add(`#${id}`);
