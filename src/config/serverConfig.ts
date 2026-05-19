@@ -50,6 +50,7 @@ export interface ResolvedPlaywrightProviderConfig {
   storageStatePath: string | null;
   executablePath: string | null;
   channel: string | null;
+  useCloakBrowser: boolean;
 }
 
 export interface ResolvedCloudflareProviderConfig {

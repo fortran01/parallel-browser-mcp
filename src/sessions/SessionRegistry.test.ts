@@ -16,6 +16,7 @@ const createStartedSession = (): StartedBrowserSession => ({
     storageStatePath: null,
     executablePath: null,
     channel: null,
+    useCloakBrowser: false,
   },
 });
 

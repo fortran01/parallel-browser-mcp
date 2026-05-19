@@ -45,4 +45,20 @@ describe('loadServerConfig', () => {
 
     expect(() => loadServerConfig()).toThrow(/Invalid browser MCP config/);
   });
+
+  it('defaults useCloakBrowser to false and respects env / config overrides', () => {
+    delete process.env.BROWSER_MCP_CONFIG;
+    delete process.env.PLAYWRIGHT_USE_CLOAKBROWSER;
+
+    expect(loadServerConfig().providers.playwright.useCloakBrowser).toBe(false);
+
+    process.env.PLAYWRIGHT_USE_CLOAKBROWSER = 'true';
+    expect(loadServerConfig().providers.playwright.useCloakBrowser).toBe(true);
+
+    delete process.env.PLAYWRIGHT_USE_CLOAKBROWSER;
+    process.env.BROWSER_MCP_CONFIG = JSON.stringify({
+      providers: { playwright: { useCloakBrowser: true } },
+    });
+    expect(loadServerConfig().providers.playwright.useCloakBrowser).toBe(true);
+  });
 });

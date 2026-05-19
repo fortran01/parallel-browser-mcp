@@ -92,6 +92,10 @@ export const loadServerConfig = (): ResolvedServerConfig => {
         executablePath:
           playwrightConfig.executablePath ?? process.env.PLAYWRIGHT_EXECUTABLE_PATH ?? null,
         channel: playwrightConfig.channel ?? process.env.PLAYWRIGHT_CHANNEL ?? null,
+        useCloakBrowser:
+          playwrightConfig.useCloakBrowser ??
+          parseBoolean(process.env.PLAYWRIGHT_USE_CLOAKBROWSER) ??
+          false,
       },
       cloudflare: {
         apiKey: process.env.CLOUDFLARE_API_TOKEN ?? null,

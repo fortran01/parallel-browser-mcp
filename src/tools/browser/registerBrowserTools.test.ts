@@ -57,6 +57,7 @@ const createSession = (): SessionRecord => {
       storageStatePath: null,
       executablePath: null,
       channel: null,
+      useCloakBrowser: false,
     },
     sessionName: null,
     createdAt: new Date().toISOString(),

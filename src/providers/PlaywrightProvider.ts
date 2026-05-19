@@ -1,8 +1,32 @@
-import { chromium, type BrowserContextOptions, type LaunchOptions } from 'playwright';
+import {
+  chromium,
+  type Browser,
+  type BrowserContextOptions,
+  type LaunchOptions,
+} from 'playwright';
 import type { ResolvedPlaywrightProviderConfig } from '../config/serverConfig.js';
 import type { StartedBrowserSession } from '../types/session.js';
-import { resolveContextAndPage } from '../utils/browser.js';
 import { BrowserProvider, type ProviderStartSessionParams } from './BrowserProvider.js';
+
+type CloakBrowserModule = {
+  launch: (options?: LaunchOptions) => Promise<Browser>;
+};
+
+const loadCloakBrowser = async (): Promise<CloakBrowserModule> => {
+  // Use an indirect specifier so TypeScript / bundlers don't require `cloakbrowser`
+  // to be installed at build time. It's an optional peer the user installs only if
+  // they opt into stealth mode.
+  const moduleId = 'cloakbrowser';
+  try {
+    return (await import(/* @vite-ignore */ moduleId)) as CloakBrowserModule;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(
+      `Playwright provider has useCloakBrowser enabled but the 'cloakbrowser' package is not installed. ` +
+        `Install it with 'npm install cloakbrowser' (https://cloakbrowser.dev/). Underlying error: ${reason}`,
+    );
+  }
+};
 
 export class PlaywrightProvider extends BrowserProvider {
   constructor(private readonly config: ResolvedPlaywrightProviderConfig) {
@@ -22,7 +46,9 @@ export class PlaywrightProvider extends BrowserProvider {
       launchOptions.channel = this.config.channel;
     }
 
-    const browser = await chromium.launch(launchOptions);
+    const browser = this.config.useCloakBrowser
+      ? await (await loadCloakBrowser()).launch(launchOptions)
+      : await chromium.launch(launchOptions);
     const contextOptions: BrowserContextOptions = {
       ...(this.config.contextOptions as BrowserContextOptions),
     };
@@ -41,6 +67,7 @@ export class PlaywrightProvider extends BrowserProvider {
       providerSessionId: null,
       metadata: {
         isLocal: true,
+        stealth: this.config.useCloakBrowser,
       },
       resolvedProviderConfig: this.config,
     };

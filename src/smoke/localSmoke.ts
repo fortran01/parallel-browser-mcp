@@ -9,6 +9,7 @@ const main = async (): Promise<void> => {
     storageStatePath: null,
     executablePath: null,
     channel: null,
+    useCloakBrowser: false,
   });
 
   const session = await provider.startSession({

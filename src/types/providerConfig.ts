@@ -44,6 +44,7 @@ export const playwrightProviderConfigSchema = z
     storageStatePath: z.string().min(1).nullable().optional(),
     executablePath: z.string().min(1).nullable().optional(),
     channel: z.string().min(1).nullable().optional(),
+    useCloakBrowser: z.boolean().optional(),
   })
   .strict();
 

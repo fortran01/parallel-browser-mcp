@@ -7,13 +7,13 @@
     "url": "https://github.com/etairl/parallel-browser-mcp",
     "source": "github"
   },
-  "version": "0.1.8",
+  "version": "0.1.9",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "parallel-browser-mcp",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
@@ -58,6 +58,12 @@
         {
           "name": "CLOUDFLARE_ACCOUNT_ID",
           "description": "Cloudflare account ID (required when using the cloudflare provider).",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "PLAYWRIGHT_USE_CLOAKBROWSER",
+          "description": "Set to 'true' to launch the local Playwright provider via CloakBrowser (https://cloakbrowser.dev/) stealth Chromium. Requires installing the optional 'cloakbrowser' npm package.",
           "isRequired": false,
           "isSecret": false
         }

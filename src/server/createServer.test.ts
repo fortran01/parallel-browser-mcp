@@ -28,6 +28,7 @@ describe('createServer', () => {
           storageStatePath: null,
           executablePath: null,
           channel: null,
+          useCloakBrowser: false,
         },
         cloudflare: {
           apiKey: null,

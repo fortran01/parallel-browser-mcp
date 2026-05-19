@@ -90,11 +90,36 @@ Recommended config shape:
     "playwright": {
       "launchOptions": {
         "headless": true
-      }
+      },
+      "useCloakBrowser": false
     }
   }
 }
 ```
+
+### Stealth Chromium via CloakBrowser
+
+The `playwright` provider can optionally launch [CloakBrowser](https://cloakbrowser.dev/) instead of vanilla Chromium for sessions that need to bypass bot detection. Enable it per-config or via env:
+
+```json
+{
+  "providers": {
+    "playwright": { "useCloakBrowser": true }
+  }
+}
+```
+
+```bash
+PLAYWRIGHT_USE_CLOAKBROWSER=true
+```
+
+`cloakbrowser` is an optional peer — install it only when you need stealth:
+
+```bash
+npm install cloakbrowser
+```
+
+The CloakBrowser binary (~200MB stealth Chromium) is downloaded automatically on the first session launch. Existing `launchOptions` / `contextOptions` continue to apply, and the rest of the provider behaves identically to standard Playwright.
 
 Required credentials by provider:
 - `playwright`: none
@@ -110,6 +135,7 @@ Optional env defaults:
 - `PLAYWRIGHT_STORAGE_STATE_PATH`
 - `PLAYWRIGHT_EXECUTABLE_PATH`
 - `PLAYWRIGHT_CHANNEL`
+- `PLAYWRIGHT_USE_CLOAKBROWSER` (`true` to launch stealth Chromium via [CloakBrowser](https://cloakbrowser.dev/); requires `npm install cloakbrowser`)
 
 ## Installation
 
