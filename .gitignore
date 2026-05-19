@@ -137,3 +137,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local npm credentials — auth via 'npm login' (~/.npmrc) locally and NPM_TOKEN secret + setup-node in CI
+.npmrc
