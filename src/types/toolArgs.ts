@@ -19,6 +19,14 @@ export const selectorSchema = sessionIdSchema.extend({
   timeout: z.number().int().positive().optional(),
 });
 
+export const clickDownloadSchema = selectorSchema.extend({
+  outputPath: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Where to save the downloaded file. Defaults to .playwright-mcp/<suggested filename>.'),
+});
+
 export const navigateSchema = sessionIdSchema.extend({
   url: z.string().url(),
 });

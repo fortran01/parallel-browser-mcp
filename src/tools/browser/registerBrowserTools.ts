@@ -1,6 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { existsSync } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
+import { dirname, extname, join, parse, resolve } from 'node:path';
 import { SessionRegistry } from '../../sessions/SessionRegistry.js';
 import {
+  clickDownloadSchema,
   domQuerySchema,
   dragSchema,
   evaluateSchema,
@@ -24,6 +28,22 @@ import {
 import { generateLocatorCandidates, extractPageSnapshot, formatPageStructure } from '../../utils/dom.js';
 import { imageResult, jsonResult, textResult } from '../../utils/mcp.js';
 import { withSession } from './browserToolUtils.js';
+
+const uniqueOutputPath = (outputPath: string): string => {
+  if (!existsSync(outputPath)) {
+    return outputPath;
+  }
+
+  const parsed = parse(outputPath);
+  for (let index = 1; index < 1000; index += 1) {
+    const candidate = join(parsed.dir, `${parsed.name}-${index}${parsed.ext}`);
+    if (!existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error(`Could not find an unused filename for ${outputPath}`);
+};
 
 export const registerBrowserTools = (server: McpServer, registry: SessionRegistry): void => {
   server.registerTool(
@@ -72,6 +92,36 @@ export const registerBrowserTools = (server: McpServer, registry: SessionRegistr
       await page.locator(selector).first().click({ timeout });
 
       return textResult(`Clicked ${selector}`);
+    }),
+  );
+
+  server.registerTool(
+    'browser_click_download',
+    {
+      title: 'Browser Click Download',
+      description: 'Click an element and save the resulting browser download.',
+      inputSchema: clickDownloadSchema,
+    },
+    withSession(registry, async ({ page }, { selector, timeout, outputPath }) => {
+      const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout }),
+        page.locator(selector).first().click({ timeout }),
+      ]);
+
+      const suggestedFilename = download.suggestedFilename();
+      const destination = resolve(outputPath ?? join('.playwright-mcp', suggestedFilename));
+      const finalPath = uniqueOutputPath(destination);
+      await mkdir(dirname(finalPath), { recursive: true });
+      await download.saveAs(finalPath);
+
+      const failure = await download.failure();
+
+      return jsonResult({
+        selector,
+        suggestedFilename,
+        path: finalPath,
+        failure,
+      });
     }),
   );
 
