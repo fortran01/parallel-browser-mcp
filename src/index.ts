@@ -10,7 +10,7 @@ const main = async (): Promise<void> => {
   const transport = new StdioServerTransport();
 
   const shutdown = async (): Promise<void> => {
-    await registry.closeAllSessions().catch(() => undefined);
+    await registry.closeAllSessions({ reason: 'shutdown' }).catch(() => undefined);
     await server.close().catch(() => undefined);
   };
 

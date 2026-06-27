@@ -10,6 +10,12 @@ const main = async (): Promise<void> => {
     executablePath: null,
     channel: null,
     useCloakBrowser: false,
+    authSessionPersistence: {
+      enabled: true,
+      rootDir: '.playwright-mcp/auth-sessions',
+      saveOnClose: true,
+      saveOnShutdown: true,
+    },
   });
 
   const session = await provider.startSession({

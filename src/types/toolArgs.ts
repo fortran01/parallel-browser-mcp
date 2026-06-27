@@ -4,6 +4,8 @@ import { providerNameSchema } from './providerConfig.js';
 export const startSessionSchema = z.object({
   provider: providerNameSchema.optional(),
   sessionName: z.string().min(1).max(100).optional(),
+  authSessionName: z.string().min(1).max(100).optional(),
+  resume: z.boolean().optional(),
 });
 
 export const closeSessionSchema = z.object({
@@ -12,6 +14,10 @@ export const closeSessionSchema = z.object({
 
 export const sessionIdSchema = z.object({
   sessionId: z.number().int().positive(),
+});
+
+export const saveAuthSessionSchema = sessionIdSchema.extend({
+  authSessionName: z.string().min(1).max(100),
 });
 
 export const selectorSchema = sessionIdSchema.extend({

@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
-import { dirname, extname, join, parse, resolve } from 'node:path';
+import { dirname, join, parse, resolve } from 'node:path';
 import { SessionRegistry } from '../../sessions/SessionRegistry.js';
 import {
   clickDownloadSchema,

@@ -21,11 +21,14 @@ Each browser session gets a numeric ID like `1`, `2`, `3`, and every `browser_*`
   - `start_session`
   - `close_session`
   - `close_all_sessions`
+  - `save_auth_session`
+  - `list_auth_sessions`
   - `get_sessions`
 - Browser tools:
   - `browser_navigate`
   - `browser_go_back`
   - `browser_click`
+  - `browser_click_download`
   - `browser_fill`
   - `browser_fill_form`
   - `browser_screenshot`
@@ -91,11 +94,51 @@ Recommended config shape:
       "launchOptions": {
         "headless": true
       },
+      "authSessionPersistence": {
+        "enabled": true,
+        "rootDir": ".playwright-mcp/auth-sessions",
+        "saveOnClose": true,
+        "saveOnShutdown": true
+      },
       "useCloakBrowser": false
     }
   }
 }
 ```
+
+### Playwright Auth Session Carryover
+
+The local Playwright provider can save website auth state under a reusable name
+and load it in a later MCP server runtime. This preserves Playwright storage
+state such as cookies and localStorage; it does not preserve the old numeric
+`sessionId`, open tabs, in-memory JavaScript state, or unsaved form fields.
+
+Example flow:
+
+1. Start a session with an auth profile name:
+
+```json
+{
+  "provider": "playwright",
+  "authSessionName": "wealthsimple"
+}
+```
+
+2. Log in through the browser tools.
+3. Save the auth profile:
+
+```json
+{
+  "sessionId": 1,
+  "authSessionName": "wealthsimple"
+}
+```
+
+4. Restart the MCP server.
+5. Start a new session with the same `authSessionName`.
+
+Saved auth profiles live under `.playwright-mcp/auth-sessions` by default. Treat
+that directory as sensitive local data because it can contain login state.
 
 ### Stealth Chromium via CloakBrowser
 
@@ -136,6 +179,10 @@ Optional env defaults:
 - `PLAYWRIGHT_EXECUTABLE_PATH`
 - `PLAYWRIGHT_CHANNEL`
 - `PLAYWRIGHT_USE_CLOAKBROWSER` (`true` to launch stealth Chromium via [CloakBrowser](https://cloakbrowser.dev/); requires `npm install cloakbrowser`)
+- `PLAYWRIGHT_AUTH_SESSION_PERSISTENCE`
+- `PLAYWRIGHT_AUTH_SESSION_ROOT_DIR`
+- `PLAYWRIGHT_AUTH_SESSION_SAVE_ON_CLOSE`
+- `PLAYWRIGHT_AUTH_SESSION_SAVE_ON_SHUTDOWN`
 
 ## Installation
 

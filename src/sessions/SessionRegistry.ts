@@ -1,8 +1,17 @@
 import type { BrowserProvider } from '../providers/BrowserProvider.js';
 import type { ProviderName } from '../types/providerConfig.js';
-import type { SessionRecord, SessionSummary, StartSessionInput } from '../types/session.js';
+import type {
+  AuthSessionSummary,
+  SessionRecord,
+  SessionSummary,
+  StartSessionInput,
+} from '../types/session.js';
 
 export class SessionRegistryError extends Error {}
+
+interface CloseSessionOptions {
+  reason?: 'user' | 'shutdown';
+}
 
 export class SessionRegistry {
   private readonly sessions = new Map<number, SessionRecord>();
@@ -23,6 +32,8 @@ export class SessionRegistry {
 
     const startedSession = await provider.startSession({
       sessionName: input.sessionName ?? null,
+      authSessionName: input.authSessionName ?? null,
+      resume: input.resume ?? true,
     });
     const now = new Date().toISOString();
     const id = this.nextSessionId;
@@ -34,6 +45,7 @@ export class SessionRegistry {
       id,
       provider: providerName,
       sessionName: input.sessionName ?? null,
+      authSessionName: input.authSessionName ?? null,
       createdAt: now,
       lastUsedAt: now,
     };
@@ -61,7 +73,7 @@ export class SessionRegistry {
     return session;
   }
 
-  async closeSession(id: number): Promise<void> {
+  async closeSession(id: number, options: CloseSessionOptions = {}): Promise<void> {
     const session = this.getSessionOrThrow(id);
     const provider = this.providers.get(session.provider);
 
@@ -69,16 +81,71 @@ export class SessionRegistry {
       throw new SessionRegistryError(`Missing provider "${session.provider}" for session ${id}.`);
     }
 
+    await this.saveBoundAuthSession(session, provider, options);
     await provider.closeSession(session);
     this.sessions.delete(id);
   }
 
-  async closeAllSessions(): Promise<number> {
+  async closeAllSessions(options: CloseSessionOptions = {}): Promise<number> {
     const ids = [...this.sessions.keys()];
 
-    await Promise.all(ids.map(async (id) => this.closeSession(id)));
+    await Promise.all(ids.map(async (id) => this.closeSession(id, options)));
 
     return ids.length;
+  }
+
+  async saveAuthSession(id: number, authSessionName: string): Promise<AuthSessionSummary> {
+    const session = this.getSessionOrThrow(id);
+    const provider = this.providers.get(session.provider);
+
+    if (provider?.saveAuthSession === undefined) {
+      throw new SessionRegistryError(
+        `Provider "${session.provider}" does not support saved auth sessions.`,
+      );
+    }
+
+    session.authSessionName = authSessionName;
+
+    return provider.saveAuthSession(session, authSessionName);
+  }
+
+  async listAuthSessions(): Promise<AuthSessionSummary[]> {
+    const summaries = await Promise.all(
+      [...this.providers.values()].map(async (provider) => {
+        if (provider.listAuthSessions === undefined) {
+          return [];
+        }
+
+        return provider.listAuthSessions();
+      }),
+    );
+
+    return summaries.flat();
+  }
+
+  private async saveBoundAuthSession(
+    session: SessionRecord,
+    provider: BrowserProvider,
+    options: CloseSessionOptions,
+  ): Promise<void> {
+    if (session.authSessionName === null || provider.saveAuthSession === undefined) {
+      return;
+    }
+
+    const saveConfig =
+      'authSessionPersistence' in session.resolvedProviderConfig
+        ? session.resolvedProviderConfig.authSessionPersistence
+        : null;
+    const shouldSave =
+      options.reason === 'shutdown'
+        ? saveConfig?.saveOnShutdown === true
+        : saveConfig?.saveOnClose === true;
+
+    if (!shouldSave) {
+      return;
+    }
+
+    await provider.saveAuthSession(session, session.authSessionName);
   }
 
   private toSummary(session: SessionRecord): SessionSummary {
@@ -87,6 +154,7 @@ export class SessionRegistry {
       provider: session.provider,
       providerSessionId: session.providerSessionId,
       sessionName: session.sessionName,
+      authSessionName: session.authSessionName,
       createdAt: session.createdAt,
       lastUsedAt: session.lastUsedAt,
       metadata: session.metadata,

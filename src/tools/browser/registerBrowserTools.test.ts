@@ -67,8 +67,15 @@ const createSession = (): SessionRecord => {
       executablePath: null,
       channel: null,
       useCloakBrowser: false,
+      authSessionPersistence: {
+        enabled: true,
+        rootDir: '.playwright-mcp/auth-sessions',
+        saveOnClose: true,
+        saveOnShutdown: true,
+      },
     },
     sessionName: null,
+    authSessionName: null,
     createdAt: new Date().toISOString(),
     lastUsedAt: new Date().toISOString(),
   };

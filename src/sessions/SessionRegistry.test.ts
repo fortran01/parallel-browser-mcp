@@ -17,6 +17,12 @@ const createStartedSession = (): StartedBrowserSession => ({
     executablePath: null,
     channel: null,
     useCloakBrowser: false,
+    authSessionPersistence: {
+      enabled: true,
+      rootDir: '.playwright-mcp/auth-sessions',
+      saveOnClose: true,
+      saveOnShutdown: true,
+    },
   },
 });
 
@@ -29,6 +35,14 @@ class TestProvider extends BrowserProvider {
     async (_params: ProviderStartSessionParams) => createStartedSession(),
   );
   readonly closeSessionMock = vi.fn(async (_session: StartedBrowserSession) => undefined);
+  readonly saveAuthSessionMock = vi.fn(async (_session: StartedBrowserSession, name: string) => ({
+    name,
+    key: name,
+    provider: 'playwright' as const,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    hasStorageState: true,
+  }));
 
   async startSession(params: ProviderStartSessionParams): Promise<StartedBrowserSession> {
     return this.startSessionMock(params);
@@ -36,6 +50,13 @@ class TestProvider extends BrowserProvider {
 
   async closeSession(session: StartedBrowserSession): Promise<void> {
     await this.closeSessionMock(session);
+  }
+
+  async saveAuthSession(
+    session: StartedBrowserSession,
+    authSessionName: string,
+  ): Promise<Awaited<ReturnType<typeof this.saveAuthSessionMock>>> {
+    return this.saveAuthSessionMock(session, authSessionName);
   }
 }
 
@@ -73,5 +94,39 @@ describe('SessionRegistry', () => {
 
     expect(closedCount).toBe(2);
     expect(closedAgain).toBe(0);
+  });
+
+  it('passes auth session input through and can save a named auth session', async () => {
+    const provider = new TestProvider();
+    const registry = new SessionRegistry(new Map([['playwright', provider]]), 'playwright');
+
+    const session = await registry.startSession({
+      authSessionName: 'mbna',
+      resume: true,
+    });
+    const authSession = await registry.saveAuthSession(session.id, 'mbna');
+
+    expect(provider.startSessionMock).toHaveBeenCalledWith({
+      sessionName: null,
+      authSessionName: 'mbna',
+      resume: true,
+    });
+    expect(provider.saveAuthSessionMock).toHaveBeenCalledTimes(1);
+    expect(authSession.name).toBe('mbna');
+    expect(registry.getSessions()[0]?.authSessionName).toBe('mbna');
+  });
+
+  it('saves bound auth sessions before shutdown close when configured', async () => {
+    const provider = new TestProvider();
+    const registry = new SessionRegistry(new Map([['playwright', provider]]), 'playwright');
+
+    await registry.startSession({ authSessionName: 'wealthsimple' });
+    await registry.closeAllSessions({ reason: 'shutdown' });
+
+    expect(provider.saveAuthSessionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ authSessionName: 'wealthsimple' }),
+      'wealthsimple',
+    );
+    expect(provider.closeSessionMock).toHaveBeenCalledTimes(1);
   });
 });

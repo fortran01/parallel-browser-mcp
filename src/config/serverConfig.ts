@@ -51,6 +51,12 @@ export interface ResolvedPlaywrightProviderConfig {
   executablePath: string | null;
   channel: string | null;
   useCloakBrowser: boolean;
+  authSessionPersistence: {
+    enabled: boolean;
+    rootDir: string;
+    saveOnClose: boolean;
+    saveOnShutdown: boolean;
+  };
 }
 
 export interface ResolvedCloudflareProviderConfig {

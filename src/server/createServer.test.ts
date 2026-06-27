@@ -29,6 +29,12 @@ describe('createServer', () => {
           executablePath: null,
           channel: null,
           useCloakBrowser: false,
+          authSessionPersistence: {
+            enabled: true,
+            rootDir: '.playwright-mcp/auth-sessions',
+            saveOnClose: true,
+            saveOnShutdown: true,
+          },
         },
         cloudflare: {
           apiKey: null,

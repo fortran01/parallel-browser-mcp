@@ -12,6 +12,8 @@ import type {
 export interface StartSessionInput {
   provider?: ProviderName;
   sessionName?: string;
+  authSessionName?: string;
+  resume?: boolean;
 }
 
 export interface StartedBrowserSession {
@@ -31,6 +33,7 @@ export interface SessionRecord extends StartedBrowserSession {
   id: number;
   provider: ProviderName;
   sessionName: string | null;
+  authSessionName: string | null;
   createdAt: string;
   lastUsedAt: string;
 }
@@ -40,6 +43,7 @@ export interface SessionSummary {
   provider: ProviderName;
   providerSessionId: string | null;
   sessionName: string | null;
+  authSessionName: string | null;
   createdAt: string;
   lastUsedAt: string;
   metadata: Record<string, unknown>;
@@ -52,4 +56,13 @@ export interface SessionSummary {
 
 export interface SessionToolContext {
   sessionId: number;
+}
+
+export interface AuthSessionSummary {
+  name: string;
+  key: string;
+  provider: ProviderName;
+  createdAt: string | null;
+  updatedAt: string | null;
+  hasStorageState: boolean;
 }

@@ -45,6 +45,15 @@ export const playwrightProviderConfigSchema = z
     executablePath: z.string().min(1).nullable().optional(),
     channel: z.string().min(1).nullable().optional(),
     useCloakBrowser: z.boolean().optional(),
+    authSessionPersistence: z
+      .object({
+        enabled: z.boolean().optional(),
+        rootDir: z.string().min(1).optional(),
+        saveOnClose: z.boolean().optional(),
+        saveOnShutdown: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

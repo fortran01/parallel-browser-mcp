@@ -1,8 +1,10 @@
-import type { StartedBrowserSession } from '../types/session.js';
+import type { AuthSessionSummary, StartedBrowserSession } from '../types/session.js';
 import type { ProviderName } from '../types/providerConfig.js';
 
 export interface ProviderStartSessionParams {
   sessionName: string | null;
+  authSessionName?: string | null;
+  resume?: boolean;
 }
 
 export abstract class BrowserProvider {
@@ -15,4 +17,11 @@ export abstract class BrowserProvider {
   abstract startSession(params: ProviderStartSessionParams): Promise<StartedBrowserSession>;
 
   abstract closeSession(session: StartedBrowserSession): Promise<void>;
+
+  saveAuthSession?(
+    session: StartedBrowserSession,
+    authSessionName: string,
+  ): Promise<AuthSessionSummary>;
+
+  listAuthSessions?(): Promise<AuthSessionSummary[]>;
 }

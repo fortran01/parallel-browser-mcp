@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionRegistry, SessionRegistryError } from '../../sessions/SessionRegistry.js';
 import {
   closeSessionSchema,
+  saveAuthSessionSchema,
   startSessionSchema,
 } from '../../types/toolArgs.js';
 import { jsonResult, textResult } from '../../utils/mcp.js';
@@ -66,6 +67,44 @@ export const registerSessionTools = (server: McpServer, registry: SessionRegistr
 
         return jsonResult({
           closedCount,
+        });
+      } catch (error) {
+        return textResult(getErrorMessage(error), true);
+      }
+    },
+  );
+
+  server.registerTool(
+    'save_auth_session',
+    {
+      title: 'Save Auth Session',
+      description: 'Save the current browser context auth state under a reusable name.',
+      inputSchema: saveAuthSessionSchema,
+    },
+    async ({ sessionId, authSessionName }) => {
+      try {
+        const authSession = await registry.saveAuthSession(sessionId, authSessionName);
+
+        return jsonResult({
+          saved: true,
+          authSession,
+        });
+      } catch (error) {
+        return textResult(getErrorMessage(error), true);
+      }
+    },
+  );
+
+  server.registerTool(
+    'list_auth_sessions',
+    {
+      title: 'List Auth Sessions',
+      description: 'List saved browser auth sessions available for reuse.',
+    },
+    async () => {
+      try {
+        return jsonResult({
+          authSessions: await registry.listAuthSessions(),
         });
       } catch (error) {
         return textResult(getErrorMessage(error), true);

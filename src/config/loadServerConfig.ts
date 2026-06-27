@@ -96,6 +96,24 @@ export const loadServerConfig = (): ResolvedServerConfig => {
           playwrightConfig.useCloakBrowser ??
           parseBoolean(process.env.PLAYWRIGHT_USE_CLOAKBROWSER) ??
           false,
+        authSessionPersistence: {
+          enabled:
+            playwrightConfig.authSessionPersistence?.enabled ??
+            parseBoolean(process.env.PLAYWRIGHT_AUTH_SESSION_PERSISTENCE) ??
+            true,
+          rootDir:
+            playwrightConfig.authSessionPersistence?.rootDir ??
+            process.env.PLAYWRIGHT_AUTH_SESSION_ROOT_DIR ??
+            '.playwright-mcp/auth-sessions',
+          saveOnClose:
+            playwrightConfig.authSessionPersistence?.saveOnClose ??
+            parseBoolean(process.env.PLAYWRIGHT_AUTH_SESSION_SAVE_ON_CLOSE) ??
+            true,
+          saveOnShutdown:
+            playwrightConfig.authSessionPersistence?.saveOnShutdown ??
+            parseBoolean(process.env.PLAYWRIGHT_AUTH_SESSION_SAVE_ON_SHUTDOWN) ??
+            true,
+        },
       },
       cloudflare: {
         apiKey: process.env.CLOUDFLARE_API_TOKEN ?? null,

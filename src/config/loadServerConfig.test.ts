@@ -61,4 +61,43 @@ describe('loadServerConfig', () => {
     });
     expect(loadServerConfig().providers.playwright.useCloakBrowser).toBe(true);
   });
+
+  it('resolves Playwright auth session persistence defaults and overrides', () => {
+    delete process.env.BROWSER_MCP_CONFIG;
+    delete process.env.PLAYWRIGHT_AUTH_SESSION_PERSISTENCE;
+    delete process.env.PLAYWRIGHT_AUTH_SESSION_ROOT_DIR;
+
+    expect(loadServerConfig().providers.playwright.authSessionPersistence).toEqual({
+      enabled: true,
+      rootDir: '.playwright-mcp/auth-sessions',
+      saveOnClose: true,
+      saveOnShutdown: true,
+    });
+
+    process.env.PLAYWRIGHT_AUTH_SESSION_PERSISTENCE = 'false';
+    process.env.PLAYWRIGHT_AUTH_SESSION_ROOT_DIR = '.auth';
+    expect(loadServerConfig().providers.playwright.authSessionPersistence).toMatchObject({
+      enabled: false,
+      rootDir: '.auth',
+    });
+
+    process.env.BROWSER_MCP_CONFIG = JSON.stringify({
+      providers: {
+        playwright: {
+          authSessionPersistence: {
+            enabled: true,
+            rootDir: '.custom-auth',
+            saveOnClose: false,
+            saveOnShutdown: false,
+          },
+        },
+      },
+    });
+    expect(loadServerConfig().providers.playwright.authSessionPersistence).toEqual({
+      enabled: true,
+      rootDir: '.custom-auth',
+      saveOnClose: false,
+      saveOnShutdown: false,
+    });
+  });
 });
